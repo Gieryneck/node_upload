@@ -1,0 +1,47 @@
+body{
+    
+    background-color: #80bdc4;    ;
+    font-family: 'Nunito', sans-serif;    
+}
+
+
+h1{
+
+    margin: 40px 20px; 
+    font-size: 40px;
+}
+
+
+form{
+
+    position: relative;
+    max-width:600px;
+    margin: 0 auto;
+    margin-top: 20vh;
+}
+
+label{
+
+    display: inline-block;
+    width: 100px;
+}
+input{
+
+    font-size: 18px;
+    margin: 20px;
+    cursor: pointer;
+}
+
+.submit{
+
+    position: absolute;
+    right:20px;
+    bottom:0;
+    padding: 8px;
+}
+
+.submit:hover{
+
+    background-color: rgba(131, 13, 13, 0.4);
+    
+}
