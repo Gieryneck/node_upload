@@ -15,29 +15,32 @@ function start() {
         console.log('Zapytanie ' + request.url + ' odebrane.'); 
 
         response.writeHead(200, 'Yo dawg, this is an optional status message, you feel me?', {'Content-Type': 'text/plain'});
+    
+        switch(true) {
+            //bedziemy szukac regexa ktory jest true. RegExp to obiekt na ktorym bedziemy wykonywac metode test(), sprawdzajac czy jest true
 
-        switch(request.url) {
-        
             //Zauważ, że instrukcja zakłada, że ma wywołać tę samą funkcję, jeśli URL będzie równy "/", lub "/start".
-            case '/':
-
-            case '/start':
+            case /^\/(start)?$/.test(request.url):
                 handlers.welcome(request, response); 
                 break;
+            // ^ - zaczyna sie od / a potem jest cokolwiek
+            // (start)? - przed ? opcjonalnie moze byc 1 character, albo wyrazenie w nawiasie
+            // $ - po tym juz nic nie moze byc
+            // znaki specjalne escapujemy
 
-            case '/upload':
+            case /^\/upload$/.test(request.url):
                 handlers.upload(request, response);
                 break;
 
-            case '/show':
+            case /^\/show\?file=/.test(request.url):
                 handlers.show(request, response);
                 break;
 
-            case '/styles/upload.css':
+            case /^\/styles\/upload\.css$/.test(request.url):
                 handlers.styles_upload(request, response);
                 break;
             
-            case '/styles/start.css':
+            case /^\/styles\/start\.css$/.test(request.url):
                 handlers.styles_start(request, response);
                 break;
 

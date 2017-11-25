@@ -10,8 +10,13 @@
 
         <h1>Przesłanie pliku powiodło się!</h1>
 
-        <img src="/show " alt="Coś jest nie tak. Tu powinien byc przesłany obraz">
-    
+        <img src="/show?file={{fileName}} " alt="Coś jest nie tak. Tu powinien byc przesłany obraz">
+        <!-- rozpoczynanie od slasha ustawia img w root, czyli localhost:8080/show 
+        -->
+        <!-- znak zapytania rozpoczyna ciag parametrow  ktore browser doda do requesta -->
+        <!-- w requescie przesylamy parametr file ktorego wartosc jest charakterystcznym ciagiem znakow
+        (podwojne nawiasy) ktory potem wyszukamy poprzez RegEx z requesta i podmienimy na nazwe pliku -->
+        
     </body>
 
 </html>

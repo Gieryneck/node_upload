@@ -1,6 +1,7 @@
 var fs = require('fs');
 var formidable = require('formidable');
-var fileName;
+const urlModule = require('url');
+
 
 exports.welcome = function (request, response) {
 
@@ -27,23 +28,33 @@ exports.upload = function (request, response) {
     form.parse(request, (error, fields, files) => { //Parses an incoming node.js request containing form data.
 
         console.log(files);
-        fileName = files.upload.name;
+        var fileName = files.upload.name;
         //console.log(fileName);
         fs.renameSync(files.upload.path, './img_upload/' + fileName); // czemu files.upload.name a nie files.upload.file.name??
+        // renameSync bo musimy zaczekac z fs.readFile az plik zostanie zapisany, 
+        // gdyby nie bylo synchronicznie to readFile musialoby byc w callbacku
 
         // poprzez renameSync określamy ścieżkę dla pliku znajdujacego sie w parametrze files.upload.path(patrz console.log(files)) 
         // i zapisujemy go w  folderze 'img upload' z oryginalna nazwa ktora jest pod parametrem files.upload.name
 
+        fs.readFile('./templates/upload.html', 'utf-8', (err, html) => { //utf-8 konieczne bo domyslnie jest kod maszynowy
+
+            if (err) throw err; // PRZYDATNE !!! KONKRETNIEJ WSKAZUJE BŁĘDY
+
+            html = html.replace('{{fileName}}', fileName);
+            // tutaj podmieniamy zdefiniowany ciag znakow na nasza zmienna z nazwa pliku
+            response.writeHead(200, 'Zapytanie powiodlo sie.', { 'Content-Type': 'text/html; charset=utf-8' });
+            response.write(html); // przesyłamy odczytany plik html
+            response.end();
+
+            /* caly node jest asynchroniczny. odczytanie pliku fs.readFile musi byc rowniez wewnatrz callbacku do form.parse,
+            bo w przeciwnym razie moze powstac sytuacja przy duzych plikach gdzie zanim plik zostanie zapisany od katalogu
+            fs.readFile bedzie chcialo go juz odczytac! */ 
+        });
+
     });
 
-    fs.readFile('./templates/upload.html', 'utf-8', (err, html) => { //utf-8 konieczne bo domyslnie jest kod maszynowy
-
-        if (err) throw err; // PRZYDATNE !!! KONKRETNIEJ WSKAZUJE BŁĘDY
-
-        response.writeHead(200, 'Zapytanie powiodlo sie.', { 'Content-Type': 'text/html; charset=utf-8' });
-        response.write(html); // przesyłamy odczytany plik html
-        response.end();
-    });
+    
 
 }
 
@@ -52,8 +63,13 @@ exports.upload = function (request, response) {
 
 // url '/show' jest w upload html w <img src="/show "> 
 exports.show = function (request, response) {
+    
+    var query = urlModule.parse(request.url, true).query;
+    console.log(query);
 
-    fs.readFile('./img_upload/' + fileName, 'binary', (error, file) => {
+
+
+    fs.readFile('./img_upload/' + query.file, 'binary', (error, file) => {
         
         /*
        - wg dokumentacji sciezka powinna zwracac blad a nie zwraca - ?? 
@@ -68,9 +84,16 @@ exports.show = function (request, response) {
        - co to jest file descriptor? w parametrze ma byc nazwa pliku albo file descriptor
         */
 
-        response.writeHead(200, { 'Content-Type': 'image/png' });
-        response.write(file, 'binary');  // przekazuje tresc binarna pliku elementowi ktory zapytal, czyli tutaj tagowi img
-        
+        if(error) {
+
+            response.writeHead(404, 'No image');
+            response.write('No image');
+        } else {
+
+            response.writeHead(200, { 'Content-Type': 'image/png' });
+            response.write(file, 'binary');  // przekazuje tresc binarna pliku elementowi ktory zapytal, czyli tutaj tagowi img
+        }
+
         response.end();
     });
 }
